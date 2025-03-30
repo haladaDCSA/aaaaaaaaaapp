@@ -8,7 +8,7 @@
 
 [functions]
   node_bundler = "esbuild"
-  external_node_modules = ["telegraf", "axios"]
+  external_node_modules = ["telegraf", "axios", "cors", "body-parser", "node-fetch"]
   node_version = "18"
 
 [headers]

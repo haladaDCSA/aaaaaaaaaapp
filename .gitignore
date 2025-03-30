@@ -4,6 +4,10 @@ node_modules/
 # Environment variables
 .env
 
+# Build output
+build/
+dist/
+
 # Logs
 logs/
 *.log
@@ -14,32 +18,24 @@ logs/
 *.swp
 *.swo
 
-# Build output
-build/
-dist/
-
-# OS files
+# OS
 .DS_Store
 Thumbs.db
+
+# Database
+*.db
+*.sqlite
+
+# Testing
+coverage/
+
+# Debug
+*.pdb
+*.pyc
+__pycache__/
 
 # Netlify
 .netlify/
 
-# Debug
-.debug/
-
-# Coverage
-coverage/
-
-# Temporary files
-*.tmp
-*.temp
-
 # Cache
 .cache/
-
-# Local development
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local

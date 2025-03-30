@@ -1,6 +1,8 @@
 require('dotenv').config();
 const express = require('express');
 const { Telegraf, Markup } = require('telegraf');
+const cors = require('cors');
+const bodyParser = require('body-parser');
 const { SUPPORTED_MODELS, modelsKeyboard, getModelInfo } = require('./models');
 const OpenRouterAPI = require('./services/openrouter');
 
@@ -75,6 +77,11 @@ const startBot = async () => {
     const bot = new Telegraf(process.env.TELEGRAM_TOKEN);
     const userStates = new Map();
     const port = process.env.PORT || 3000;
+
+    // تكوين Express
+    app.use(cors());
+    app.use(bodyParser.json());
+    app.use(bodyParser.urlencoded({ extended: true }));
 
     // Command handlers
     bot.command('start', (ctx) => {
@@ -176,6 +183,34 @@ const startBot = async () => {
     // Start the bot
     await bot.launch();
     console.log('✅ Bot started successfully');
+
+    // Set webhook for Netlify
+    const webhookUrl = process.env.NETLIFY_DOMAIN 
+        ? `https://${process.env.NETLIFY_DOMAIN}/.netlify/functions/bot` 
+        : 'https://your-domain.netlify.app/.netlify/functions/bot';
+
+    try {
+        await bot.telegram.setWebhook(webhookUrl);
+        console.log(`✅ Webhook set to: ${webhookUrl}`);
+    } catch (error) {
+        console.error('❌ Error setting webhook:', error);
+    }
+
+    // Start the server
+    app.listen(port, () => {
+        console.log(`✅ Server running on port ${port}`);
+    });
+
+    // Health check endpoint
+    app.get('/health', (req, res) => {
+        res.status(200).json({ status: 'healthy' });
+    });
+
+    // Bot webhook endpoint
+    app.post('/.netlify/functions/bot', (req, res) => {
+        bot.handleUpdate(req.body);
+        res.sendStatus(200);
+    });
 };
 
 startBot().catch(console.error);
