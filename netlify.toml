@@ -1,0 +1,40 @@
+[build]
+  command = "npm install && npm run build"
+  publish = "build"
+
+[dev]
+  command = "npm run dev"
+  port = 3000
+
+[functions]
+  node_bundler = "esbuild"
+  external_node_modules = ["telegraf"]
+  node_version = "18"
+
+[headers]
+  "/"
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' openrouter.ai;"
+
+[redirects]
+  [[redirects]]
+  from = "/webhook"
+  to = "/.netlify/functions/bot"
+  status = 200
+  force = true
+  methods = ["POST"]
+
+  [[redirects]]
+  from = "/health"
+  to = "/.netlify/functions/health"
+  status = 200
+  force = true
+
+  "/health" = "/health"
+  "/" = "/"
+
+[plugins]
+  - "@netlify/plugin-functions-deploy"
