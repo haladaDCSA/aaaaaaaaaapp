@@ -10,7 +10,7 @@ const config = {
             auth: "/auth/key"
         },
         extraHeaders: {
-            "HTTP-Referer": "https://67e82123c3c77d8aa9025154--clinquant-croissant-f1a712.netlify.app",
+            "HTTP-Referer": process.env.NETLIFY_DOMAIN || "https://your-domain.netlify.app",
             "X-Title": "Al3raf Bot",
             "Content-Type": "application/json"
         }
@@ -24,14 +24,16 @@ const config = {
         host: '0.0.0.0'
     },
     webhookConfig: {
-        domain: "67e82123c3c77d8aa9025154--clinquant-croissant-f1a712.netlify.app",
+        domain: process.env.NETLIFY_DOMAIN || "https://your-domain.netlify.app",
         path: "/.netlify/functions/bot",
         port: 443,
         https: true
     },
-    webhookUrl: "https://67e82123c3c77d8aa9025154--clinquant-croissant-f1a712.netlify.app/.netlify/functions/bot",
+    webhookUrl: process.env.NETLIFY_DOMAIN ? 
+        `https://${process.env.NETLIFY_DOMAIN}/.netlify/functions/bot` : 
+        "https://your-domain.netlify.app/.netlify/functions/bot",
     webhookOptions: {
-        host: "67e82123c3c77d8aa9025154--clinquant-croissant-f1a712.netlify.app",
+        host: process.env.NETLIFY_DOMAIN || "your-domain.netlify.app",
         path: "/api/webhook"
     }
 };
