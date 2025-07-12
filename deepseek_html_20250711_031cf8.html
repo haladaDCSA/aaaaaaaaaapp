@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تحليل الجفر للأرقام - النسخة المتطورة</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0a192f, #0f3460, #1a1a2e);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+            background-size: 400% 400%;
+            animation: gradientBG 20s ease infinite;
+            position: relative;
+        }
+        
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="none" stroke="rgba(255,215,0,0.1)" stroke-width="1"/></svg>');
+            opacity: 0.3;
+            z-index: -1;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 25px;
+            background: rgba(10, 25, 47, 0.7);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #FFD700, #FF8C00, #FFD700);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: #FFD700;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+            position: relative;
+            display: inline-block;
+        }
+        
+        h1::after {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #FFD700, transparent);
+            border-radius: 50%;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #f8f9fa;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.7;
+            opacity: 0.9;
+        }
+        
+        .input-section {
+            background: rgba(10, 25, 47, 0.7);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+        
+        .input-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .input-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        label {
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+            color: #FFD700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        input[type="number"] {
+            width: 100px;
+            padding: 15px;
+            font-size: 1.8rem;
+            text-align: center;
+            border: 2px solid #FFD700;
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.25);
+            color: white;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        input[type="number"]:focus {
+            outline: none;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            transform: scale(1.05);
+        }
+        
+        .jafr-type {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 25px 0;
+            justify-content: center;
+        }
+        
+        .jafr-type label {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 15px 30px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        .jafr-type label:hover {
+            background: rgba(255, 215, 0, 0.2);
+            transform: translateY(-3px);
+        }
+        
+        .jafr-type input[type="radio"] {
+            display: none;
+        }
+        
+        .jafr-type input[type="radio"]:checked + label {
+            background: rgba(255, 215, 0, 0.4);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+            transform: translateY(-3px);
+        }
+        
+        button {
+            background: linear-gradient(45deg, #FFD700, #FF8C00);
+            color: #0a192f;
+            border: none;
+            padding: 16px 45px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            display: block;
+            margin: 25px auto;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        button::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: 0.5s;
+        }
+        
+        button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.7);
+        }
+        
+        button:hover::before {
+            left: 100%;
+        }
+        
+        button:active {
+            transform: translateY(2px);
+        }
+        
+        .result-section {
+            background: rgba(10, 25, 47, 0.8);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            display: none;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            margin-top: 30px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+        
+        .result-section.visible {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .result-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #FFD700;
+            position: relative;
+        }
+        
+        .result-header::after {
+            content: "";
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #FFD700, transparent);
+            border-radius: 50%;
+        }
+        
+        .result-title {
+            font-size: 2.2rem;
+            color: #FFD700;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+        }
+        
+        .predictions {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 140, 0, 0.1));
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .predictions::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24"><path fill="rgba(255,215,0,0.1)" d="M12,2A10,10,0,1,0,22,12,10,10,0,0,0,12,2Zm0,18a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"/></svg>');
+            opacity: 0.1;
+        }
+        
+        .predictions-title {
+            font-size: 1.8rem;
+            color: #FFD700;
+            margin-bottom: 25px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            position: relative;
+        }
+        
+        .predictions-title::after {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #FFD700, transparent);
+            border-radius: 50%;
+        }
+        
+        .prediction-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        .prediction-item {
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            border-left: 3px solid #FFD700;
+        }
+        
+        .prediction-item:hover {
+            background: rgba(0, 0, 0, 0.3);
+            transform: translateX(5px);
+        }
+        
+        .prediction-item i {
+            color: #FFD700;
+            font-size: 1.4rem;
+            margin-top: 5px;
+            min-width: 30px;
+        }
+        
+        .prediction-text {
+            font-size: 1.15rem;
+            line-height: 1.7;
+        }
+        
+        .result-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+        }
+        
+        .result-item {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 25px;
+            transition: transform 0.3s;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+        }
+        
+        .result-item:hover {
+            transform: translateY(-8px);
+            background: rgba(255, 215, 0, 0.1);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .result-category {
+            font-size: 1.35rem;
+            color: #FFD700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .result-text {
+            font-size: 1.15rem;
+            line-height: 1.8;
+            color: #e0e0e0;
+        }
+        
+        .symbol {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.7);
+            animation: pulse 3s infinite ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 25px;
+            color: #aaa;
+            font-size: 0.95rem;
+            background: rgba(10, 25, 47, 0.7);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+        }
+        
+        .footer p {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+        
+        @media (max-width: 768px) {
+            .input-group {
+                flex-direction: column;
+            }
+            
+            .jafr-type {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .result-content {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .result-title {
+                font-size: 1.8rem;
+            }
+            
+            .predictions-title {
+                font-size: 1.5rem;
+            }
+            
+            .symbol {
+                font-size: 2.8rem;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+        }
+        
+        .number-grid {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            gap: 8px;
+            margin: 25px 0;
+            max-width: 800px;
+            margin: 25px auto;
+        }
+        
+        .number-item {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            font-size: 1.3rem;
+            position: relative;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+        
+        .number-item:hover {
+            background: rgba(255, 215, 0, 0.3);
+            transform: scale(1.15);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+        }
+        
+        .number-item.active {
+            background: rgba(255, 215, 0, 0.5);
+            transform: scale(1.2);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .loader {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(255, 215, 0, 0.2);
+            border-top: 5px solid #FFD700;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            font-size: 1.2rem;
+            color: #FFD700;
+        }
+        
+        .birthdate-input {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .birthdate-input label {
+            display: block;
+            margin-bottom: 15px;
+        }
+        
+        .birthdate-input input {
+            padding: 12px;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            border: 1px solid #FFD700;
+            background: rgba(0, 0, 0, 0.25);
+            color: white;
+            width: 200px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-crystal-ball"></i> تحليل الجفر للأرقام</h1>
+            <p class="subtitle">
+                علم الجفر من العلوم القديمة التي تعتمد على تحليل الأرقام واستخراج دلالاتها في مختلف جوانب الحياة. أدخل رقمًا من 1 إلى 9 واختر نوع التحليل (دول أو أشخاص) لتحصل على تحليل مفصل حسب علم الجفر.
+            </p>
+        </header>
+        
+        <section class="input-section">
+            <div class="input-group">
+                <div class="input-box">
+                    <label for="number"><i class="fas fa-hashtag"></i> اختر رقمًا من 1 إلى 9</label>
+                    <input type="number" id="number" min="1" max="9" value="5">
+                </div>
+            </div>
+            
+            <div class="number-grid">
+                <div class="number-item" data-number="1">1</div>
+                <div class="number-item" data-number="2">2</div>
+                <div class="number-item" data-number="3">3</div>
+                <div class="number-item" data-number="4">4</div>
+                <div class="number-item active" data-number="5">5</div>
+                <div class="number-item" data-number="6">6</div>
+                <div class="number-item" data-number="7">7</div>
+                <div class="number-item" data-number="8">8</div>
+                <div class="number-item" data-number="9">9</div>
+            </div>
+            
+            <div class="birthdate-input">
+                <label for="birthdate"><i class="fas fa-calendar-alt"></i> تاريخ الميلاد (اختياري)</label>
+                <input type="date" id="birthdate">
+            </div>
+            
+            <div class="jafr-type">
+                <input type="radio" id="people" name="jafrType" value="people" checked>
+                <label for="people"><i class="fas fa-user"></i> أشخاص</label>
+                
+                <input type="radio" id="countries" name="jafrType" value="countries">
+                <label for="countries"><i class="fas fa-globe-asia"></i> دول</label>
+            </div>
+            
+            <button id="analyzeBtn"><i class="fas fa-calculator"></i> احصل على التحليل</button>
+            
+            <div class="loading" id="loading">
+                <div class="loader"></div>
+                <p class="loading-text">جاري تحليل الرقم واستخراج التوقعات...</p>
+            </div>
+        </section>
+        
+        <section class="result-section" id="resultSection">
+            <div class="result-header">
+                <div class="symbol" id="symbol">☿</div>
+                <h2 class="result-title" id="resultTitle">تحليل الجفر للرقم 5 - الحرية / المغامرة / عطارد</h2>
+            </div>
+            
+            <div class="predictions" id="predictionsSection">
+                <h3 class="predictions-title"><i class="fas fa-crystal-ball"></i> التوقعات العامة</h3>
+                <div class="prediction-list" id="predictionList">
+                    <!-- سيتم ملء التوقعات هنا بواسطة الجافاسكريبت -->
+                </div>
+            </div>
+            
+            <div class="result-content" id="resultContent">
+                <!-- سيتم ملء المحتوى هنا بواسطة الجافاسكريبت -->
+            </div>
+        </section>
+        
+        <footer class="footer">
+            <p>هذا الموقع للأغراض التعليمية والترفيهية فقط | علم الجفر من العلوم القديمة التي تحتاج لفهم عميق</p>
+            <p>جميع الحقوق محفوظة &copy; 2023</p>
+        </footer>
+    </div>
+
+    <script>
+        // بيانات تحليل الجفر للأشخاص
+        const peopleAnalysis = {
+            1: [
+                {category: "الصفات الجسدية", text: "وجه طويل، نظرة حادة، جسم مائل للنحافة، ملامح قيادية. يتمتع بطاقة بدنية عالية وقدرة على التحمل."},
+                {category: "الطاقة العامة", text: "طاقة نارية فعّالة – اندفاعية – قيادية – لا تنتظر الإذن. غالبًا ما يكون في مقدمة الصفوف ويتخذ القرارات بسرعة."},
+                {category: "المال", text: "يسعى للثراء المباشر – لا يحب القيود المالية – قد ينجح في التجارة الحرة والاستثمارات الجريئة. لديه حاسة مالية قوية لكن قد يتعجل في القرارات."},
+                {category: "المهنة", text: "قائد، مدير، صاحب مشروع – يرفض التبعية. ينجح في المواقع القيادية والمهن التي تتطلب اتخاذ قرارات سريعة."},
+                {category: "علاقاته بالآخرين", text: "علاقاته محدودة لكن مؤثرة – يميل للسيطرة – صدامي إن تم تحديه. يفضل العلاقات التي تعزز مكانته."},
+                {category: "الأسرة", text: "يقود العائلة أو يبتعد عنها – غالبًا الابن الأكبر أو الأهم. يتحمل مسؤوليات كبيرة تجاه أسرته."},
+                {category: "الطموحات", text: "لا حدود لها – يطمح للقيادة أو الشهرة – يرى نفسه استثنائيًا. لديه رؤية واضحة لمستقبله."},
+                {category: "الصحة", text: "عرضة لضغط الدم أو مشاكل الرأس – يجب تهدئة النظام العصبي. يحتاج لتمارين الاسترخاء والراحة الكافية."},
+                {category: "العاطفة", text: "عاشق ناري – يحب بقوة – لكنه لا يتحمل الضعف أو التملك. يحتاج لشريك يقدر استقلاليته."},
+                {category: "الأسرار", text: "يحمل أسرارًا تتعلق بالهوية والقيمة الذاتية – لا يبوح بسهولة. يحافظ على خصوصيته بصرامة."}
+            ],
+            2: [
+                {category: "الصفات الجسدية", text: "ملامح رقيقة، بشرة ناعمة، جسم ناعم الانسياب – غالبًا أنثوي الطابع أو محب للجمال. يتمتع بحساسية عالية تجاه البيئة المحيطة."},
+                {category: "الطاقة العامة", text: "طاقة مائية – حساسة – تحتاج الدعم – تتقلب حسب المحيط. يتأثر بمواقف الآخرين ومشاعرهم."},
+                {category: "المال", text: "يأتيه المال من الآخرين – عبر شراكات أو دعم – لكنه لا يُدير المال بمهارة. يحتاج لشريك مالي يساعده في الإدارة."},
+                {category: "المهنة", text: "فنان، مستشار، معالج – يبدع في المهن التي تعتمد على العاطفة والحدس. ينجح في المجالات الإنسانية والعلاجية."},
+                {category: "علاقاته بالآخرين", text: "اجتماعي، لكنه سريع التأثر – يحب رضا الناس، وقد يقع في التبعية. يحتاج لتطوير الثقة بالنفس."},
+                {category: "الأسرة", text: "مرتبط بها جدًا – وقد يتأذى بسببها – يحب دور 'المُضحّي'. يعطي أكثر مما يأخذ في العلاقات الأسرية."},
+                {category: "الطموحات", text: "يطمح لكن يخاف من الفشل – يحتاج دفعًا من الآخرين. يحتاج لبيئة داعمة لتحقيق أهدافه."},
+                {category: "الصحة", text: "عرضة لأمراض القولون، أو الاكتئاب – يتأثر بالطقس والمزاج العام. يحتاج للراحة النفسية والاسترخاء."},
+                {category: "العاطفة", text: "عاطفي جدًا – يضحي – ينجذب للشخصيات القوية – يهرب من المواجهة. يبحث عن الاستقرار العاطفي."},
+                {category: "الأسرار", text: "لا يبوح بسهولة – لكن ينكشف إن اهتز عاطفيًا. يحتفظ بمشاعره لنفسه."}
+            ],
+            3: [
+                {category: "الصفات الجسدية", text: "وجه دائري، ابتسامة واضحة، طاقة جذابة – يميل للرشاقة أو يظهر أصغر من عمره. يتمتع بحيوية وطاقة إيجابية."},
+                {category: "الطاقة العامة", text: "طاقة هوائية، مرحة، متجددة – ينشر البهجة لكنه قد يخفي الحزن. يحب التنوع والتغيير في حياته."},
+                {category: "المال", text: "رزق متذبذب – ينجح في التسويق، الفن، أو المجال الإعلامي – لكن لا يدّخر كثيرًا. يحتاج لتنظيم مالي أفضل."},
+                {category: "المهنة", text: "إعلامي، كاتب، فنان، مؤثر اجتماعي – ينجح في المهن التي تتطلب تواصلًا. يحب المهن الإبداعية."},
+                {category: "علاقاته بالآخرين", text: "اجتماعي، محبوب، لبق – لكن يخشى الالتزام الكامل. يملك شبكة علاقات واسعة."},
+                {category: "الأسرة", text: "قد يكون مصدر البهجة أو الضغط فيها – يحتاج الحرية داخل البيت. يحب التجمعات العائلية."},
+                {category: "الطموحات", text: "يطمح لأن يكون محبوبًا ومؤثرًا – يسعى للشهرة أكثر من السلطة. يحلم بأن يكون معروفًا ومؤثرًا."},
+                {category: "الصحة", text: "عرضة لمشاكل التنفس، التوتر، أو الهضم – لكنه يتعافى بسرعة. يحتاج لتمارين التنفس والاسترخاء."},
+                {category: "العاطفة", text: "ساحر – يحب أكثر من مرة – يميل للتنوع لكنه صادق عند الاستقرار. يبحث عن شريك يفهم حاجته للحرية."},
+                {category: "الأسرار", text: "يخفي ضعفه خلف ضحكته – يعاني من شعور داخلي بالوحدة أحيانًا. نادرًا ما يظهر مشاعره الحقيقية."}
+            ],
+            4: [
+                {category: "الصفات الجسدية", text: "بنية قوية، ملامح جدية، وجه مستطيل – قد يظهر أكبر من عمره. يتمتع بقوة بدنية وقدرة على التحمل."},
+                {category: "الطاقة العامة", text: "طاقة ترابية – ثابتة، عملية، منظمة – تحب البناء والهيكل. يعمل بجد ويمتلك إرادة قوية."},
+                {category: "المال", text: "يحقق المال بصعوبة لكنه يحتفظ به – يفضل الاستثمار في العقار أو الأرض. يدير أمواله بحكمة ومسؤولية."},
+                {category: "المهنة", text: "مهندس، محاسب، مدير تنفيذي – يميل للروتين والأمان الوظيفي. ينجح في المهن المنظمة والمنهجية."},
+                {category: "علاقاته بالآخرين", text: "منغلق قليلًا – لا يعطي ثقته بسهولة – صادق لكن بارد المشاعر. يبني علاقات قليلة لكنها عميقة."},
+                {category: "الأسرة", text: "يقدس الأسرة – يتعامل معها كواجب ومسؤولية. يوفر الأمان والاستقرار لأسرته."},
+                {category: "الطموحات", text: "بطيئة لكنها واقعية – يخطط على المدى الطويل. يضع أهدافًا واضحة ويسير نحوها بثبات."},
+                {category: "الصحة", text: "عرضة لمشاكل العظام أو المفاصل – أو أمراض ناتجة عن الإجهاد البدني. يحتاج للراحة والاهتمام بصحته."},
+                {category: "العاطفة", text: "يحب بصدق لكن يعبّر بشكل عملي – لا يجيد الرومانسية اللفظية. يظهر حبه بالأفعال لا بالأقوال."},
+                {category: "الأسرار", text: "يخفي الكثير – لا يُظهر مشاعره – لا يُشارك إلا في الضرورة. يحافظ على خصوصيته بصرامة."}
+            ],
+            5: [
+                {category: "الصفات الجسدية", text: "جذاب، حيوي، يتغير شكله باستمرار – عيناه متحركتان مليئتان بالطاقة. يتمتع بمرونة بدنية وحيوية عالية."},
+                {category: "الطاقة العامة", text: "طاقة متغيرة – هوائية نارية – تميل للانطلاق والاكتشاف. يحب المغامرة والتجارب الجديدة."},
+                {category: "المال", text: "يأتي من السفر أو التنقل أو الأفكار – يحب المغامرة المالية. قد يحقق أرباحًا سريعة لكنه يحتاج لتنظيم مالي."},
+                {category: "المهنة", text: "رحّالة، صحفي، مندوب، رائد أعمال – لا يُطيق الجلوس في مكان واحد. ينجح في المهن التي تتطلب تنقلًا وتنوعًا."},
+                {category: "علاقاته بالآخرين", text: "يحب الجميع – لكنه يهرب من الالتزام – صعب السيطرة عليه. يبحث عن الحرية في العلاقات."},
+                {category: "الأسرة", text: "يشعر أنها تقيده – إما يبتعد عنها أو يتمرد على أعرافها. يحتاج لمساحة شخصية واسعة."},
+                {category: "الطموحات", text: "يريد أن يعيش كل شيء – لا يحدد هدفًا واحدًا – يسعى للتجربة لا للنتيجة. يحلم بحياة مليئة بالمغامرات."},
+                {category: "الصحة", text: "عرضة للحوادث أو الإجهاد العصبي – يحتاج للحركة الدائمة. يجب أن ينتبه لسلامته في التنقل."},
+                {category: "العاطفة", text: "مغامر، ملول، يحب المفاجآت – لا يتحمل العلاقات الثقيلة. يبحث عن شريك يوفر له الحرية والتجديد."},
+                {category: "الأسرار", text: "يخفي رغبة عميقة في الحرية – لا يعترف بضعفه بسهولة. نادرًا ما يظهر مخاوفه أو قيوده."}
+            ],
+            6: [
+                {category: "الصفات الجسدية", text: "وجه جميل، نظرات دافئة، حضور مريح – غالبًا شكل متناسق وملامح محببة. يتمتع بجاذبية طبيعية وهدوء."},
+                {category: "الطاقة العامة", text: "طاقة محبة، مسؤولية، انسجام – رقم الحب والعائلة. يسعى دائمًا لخلق الانسجام حوله."},
+                {category: "المال", text: "يأتي عبر الناس – يحب الإنفاق على من يحب – لا يُجيد الادخار. ينفق بسخاء على من يحبهم."},
+                {category: "المهنة", text: "معلم، فنان، معالج، مصمم – ينجح في خدمة الآخرين. يحب المهن التي تسمح له بالعطاء."},
+                {category: "علاقاته بالآخرين", text: "محبوب، يُحتضن من الجميع – لكنه يرهق نفسه بإرضائهم. يضع احتياجات الآخرين قبل احتياجاته."},
+                {category: "الأسرة", text: "مركز حياته – يتفانى في خدمتها – وقد ينسى نفسه لأجلها. يوفر الدعم العاطفي لأسرته."},
+                {category: "الطموحات", text: "ليست شخصية – يطمح لراحة من يحب – أحلامه مرتبطة بالعاطفة. يحلم بأسرة سعيدة وحياة مستقرة."},
+                {category: "الصحة", text: "عرضة للسكري أو أمراض القلب – يتأثر بالمشاعر بقوة. يحتاج للراحة النفسية والعاطفية."},
+                {category: "العاطفة", text: "محب بلا حدود – يغفر كثيرًا – لكن إن انكسر، ينهار. يبحث عن علاقة دائمة ومستقرة."},
+                {category: "الأسرار", text: "يحمل أسرار العائلة – يعرف خفايا الناس – يحتفظ بها في قلبه. يحافظ على أسرار الآخرين بوفاء."}
+            ],
+            7: [
+                {category: "الصفات الجسدية", text: "عينان غامضتان، ملامح هادئة، نظرة بعيدة – غالبًا نحيف أو طويل. يتمتع بوجود هادئ وغامض."},
+                {category: "الطاقة العامة", text: "طاقة روحانية، تحليلية، متأملة – باطني الطباع، لا يحب الضوء المباشر. يحب التأمل والتفكير العميق."},
+                {category: "المال", text: "يأتي عبر الدراسة، البحث، أو الصدفة – لا يهتم بالمظاهر المالية كثيرًا. يفضل البساطة في الحياة المادية."},
+                {category: "المهنة", text: "باحث، فيلسوف، مبرمج، فقيه، محلل نفسي – ينجح في مهن تحتاج العزلة أو العمق. يحب المهن الفكرية والتحليلية."},
+                {category: "علاقاته بالآخرين", text: "غامض، منغلق – يُخيف البعض بغموضه – لا يظهر نواياه بسهولة. يبني علاقات قليلة لكن عميقة."},
+                {category: "الأسرة", text: "قد يشعر بالغربة داخلها – ينسحب مبكرًا – أو يكون المختلف بينهم. يحتاج لمساحة شخصية كبيرة."},
+                {category: "الطموحات", text: "لا يطمح للشهرة بل للمعرفة – يريد فهم الحياة لا السيطرة عليها. يحلم باكتشاف أسرار الوجود."},
+                {category: "الصحة", text: "عرضة لمشاكل الجهاز العصبي، أو الأرق، أو آلام الرأس المزمنة. يحتاج للراحة الذهنية والتأمل."},
+                {category: "العاطفة", text: "عميق المشاعر لكنه متحفظ – يُحب بصمت – نادرًا ما يُظهر حبه علنًا. يبحث عن شريك يفهم عالمه الداخلي."},
+                {category: "الأسرار", text: "هو سرّ بذاته – يعرف أسرار الآخرين لكنه لا يكشف عن نفسه. يحافظ على خصوصيته بصرامة."}
+            ],
+            8: [
+                {category: "الصفات الجسدية", text: "مظهر قوي، هيئة واثقة، جاذبية سلطة – أكتاف عريضة أو بنية عضلية. يتمتع بحضور قوي وثقة بالنفس."},
+                {category: "الطاقة العامة", text: "طاقة مادية – سلطة – تحكم – طموح شديد – لا يحب أن يكون تابعًا. يسعى للسيطرة والتحكم في مجريات الأمور."},
+                {category: "المال", text: "يجذب المال من خلال قوته أو مكانته – يعرف كيف يدير المال بذكاء. يحقق الثروة من خلال العمل الجاد والذكاء."},
+                {category: "المهنة", text: "قائد شركة، رجل أعمال، سياسي، إداري كبير – يحب القوة والنفوذ. ينجح في المواقع القيادية والسلطوية."},
+                {category: "علاقاته بالآخرين", text: "مسيطر، لا يُظهر ضعفه – يطلب الاحترام لا الشفقة. يبني علاقات قائمة على الاحترام المتبادل."},
+                {category: "الأسرة", text: "قد يكون العائل – أو من يتحكم في قراراتها – يُحترم لكنه ليس حنونًا دائمًا. يوفر الحماية المادية لأسرته."},
+                {category: "الطموحات", text: "لا حدود لها – يريد القوة، المال، والخلود الرمزي. يحلم بتأسيس إمبراطورية خاصة به."},
+                {category: "الصحة", text: "عرضة لأمراض ضغط الدم، القلب، أو الإجهاد المهني. يحتاج لإدارة الضغوط والراحة."},
+                {category: "العاطفة", text: "صعب الإرضاء – يحب بعقله قبل قلبه – غيور ويمتلك من يحب. يبحث عن شريك قوي ومستقل."},
+                {category: "الأسرار", text: "يُخفي كل شيء – لا يُظهر مشاعره – يخشى أن يُستغل. يحافظ على أسراره بصرامة."}
+            ],
+            9: [
+                {category: "الصفات الجسدية", text: "وجه رحيم، عيون دامعة، هالة إنسانية – أحيانًا يظهر عليه الإرهاق الروحي. يتمتع بحضور هادئ ومؤثر."},
+                {category: "الطاقة العامة", text: "طاقة كونية، إنسانية، ختامية – يعيش ليخدم، ليُسامح، ليُعطي. يسعى لمساعدة الآخرين وتحسين العالم."},
+                {category: "المال", text: "يأتيه المال حين لا يسعى إليه – يعطي كثيرًا – لا يركز على الربح. ينفق بسخاء على القضايا الإنسانية."},
+                {category: "المهنة", text: "طبيب، فنان، معلم روحاني، عامل إغاثة – أي مجال فيه عطاء. ينجح في المهن الخدمية والإنسانية."},
+                {category: "علاقاته بالآخرين", text: "خَدوم، عطوف، يتألم بصمت – يُستغل أحيانًا لكنه لا يشتكي. يعطي دون انتظار مقابل."},
+                {category: "الأسرة", text: "قد يُضحّي لأجلها بالكامل – أو يُنكر نفسه تمامًا في سبيلهم. يوفر الدعم العاطفي والمعنوي."},
+                {category: "الطموحات", text: "لا شخصية – بل جماعية – يريد ترك أثر طيب في العالم. يحلم بتغيير العالم للأفضل."},
+                {category: "الصحة", text: "عرضة لأمراض المناعة، السكري، أو الإنهاك العصبي. يحتاج للراحة والاهتمام بصحته."},
+                {category: "العاطفة", text: "يحب بلا شروط – قد يقع في حب مؤذٍ – لكنه لا يندم على الحب. يبحث عن الحب المطلق وغير المشروط."},
+                {category: "الأسرار", text: "يحمل أحزانًا قديمة – لا يكشفها حتى لأقرب الناس. يحافظ على آلامه لنفسه."}
+            ]
+        };
+
+        // بيانات تحليل الجفر للدول
+        const countriesAnalysis = {
+            1: [
+                {category: "الحاكم", text: "شخصية قيادية تُصرّ على السيطرة – قرارات فوقية، محاولة للظهور كقائد مُخلِّص. نسبة التغيير: 21%. يحاول فرض رؤيته بغض النظر عن المعارضة."},
+                {category: "الشعب", text: "ميل للتمرد النفسي – رفض للواقع لكنه غير منظم – بداية تشكّل تيارات شبابية جديدة تحمل لغة مختلفة عن المعارضة التقليدية. تظهر بوادر تغيير لكنها غير منظمة."},
+                {category: "المال", text: "بداية دورة مالية جديدة – عقود مع أطراف خارجية – مشروعات ناشئة صغيرة يُسلط الضوء عليها. الاقتصاد في مرحلة انتقالية."},
+                {category: "السمعة", text: "تلميع إعلامي مفرط – محاولات لتثبيت صورة 'المنقذ' – لكنه يواجه نقد خفي في مؤسسات دولية. الصورة الخارجية تحتاج للتحسين."},
+                {category: "الأزمات", text: "قرارات حكومية تسبب جدل – ملفات فساد تُفتح ثم تُغلق فجأة – أزمة قصيرة لكن ذات ضجة إعلامية. تحتاج لإدارة أزمات فعالة."},
+                {category: "العقبات", text: "غياب التنسيق بين الجهات – تفرد بالقرار – ضغط على الأجهزة لتطبيق سياسة فوقية. البيروقراطية تعيق التقدم."},
+                {category: "الكوارث", text: "احتمال حادث أو تصعيد سريع في منطقة حدودية – بدون إعلان مباشر. يجب الاستعداد للطوارئ."},
+                {category: "النجاحات", text: "مشروع قومي يُعاد تقديمه بشكل جديد – محاولة بناء 'أمل صناعي'. فرصة لتحسين الصورة الداخلية."},
+                {category: "الجيش", text: "موقفه حذر – لا يدخل في العلن – لكن يراقب عن كثب. يلعب دور المراقب الحذر."},
+                {category: "الشرطة", text: "تفاعل واضح مع القضايا الاجتماعية – حملات مكثفة ذات طابع شعبي. تحاول تحسين صورتها لدى الشعب."}
+            ],
+            2: [
+                {category: "الحاكم", text: "يميل للحلول الوسط – يظهر كـ'وسيط داخلي' بين أطراف متصارعة – قرارات إصلاحية مؤجلة. نسبة التغيير: 43%. يحاول تحقيق التوازن بين القوى المختلفة."},
+                {category: "الشعب", text: "مزاج متذبذب – صعود في نسبة الهجرة الداخلية والخارجية – بحث عن الأمان وليس التغيير. الشعب في حالة ترقب وانتظار."},
+                {category: "المال", text: "انكماش ملحوظ – تخفيض دعم – تضخم مقنع – لكن دعم دولي يُستخدم لتمديد الصبر الشعبي. الاقتصاد تحت ضغط شديد."},
+                {category: "السمعة", text: "إشارات تعاون دولي – قبول مشروط خارجي – لكن صورة غير مستقرة في المؤشرات الاقتصادية. الصورة الدولية تحتاج لتحسين."},
+                {category: "الأزمات", text: "أزمة غذائية أو دوائية – نقص في بعض الموارد – توترات في العلاقات مع جيران إقليميين. يجب الاستعداد لأزمات محتملة."},
+                {category: "العقبات", text: "تضارب بين الوزارات – قرارات غير مفهومة – صراع نفوذ داخل الجهاز الإداري. الفساد الإداري يعيق التقدم."},
+                {category: "الكوارث", text: "فيضان محلي أو مشكلة بيئية موسمية – إنذار واضح في قطاع الزراعة. يجب الاهتمام بالبيئة والزراعة."},
+                {category: "النجاحات", text: "إنجاز دبلوماسي – فتح قنوات اتصال كانت مغلقة – بداية تفكك عزلة دولية. فرصة لتحسين العلاقات الخارجية."},
+                {category: "الجيش", text: "يتدخل لحل أزمة داخلية – يظهر في صورة الضامن – دعم للمؤسسات دون الظهور الإعلامي. يلعب دور الوسيط في الأزمات."},
+                {category: "الشرطة", text: "تمركز أكثر حول مراكز القرار – تشديد الحماية – ضبط مراكز قوى غير رسمية. تركز على حماية النظام."}
+            ],
+            3: [
+                {category: "الحاكم", text: "يميل للخطاب الشعبوي – يظهر بابتسامة لكن يمرر قرارات صعبة – يحاول بناء شعبية 'ناعمة'. نسبة التغيير: 29%. يستخدم الإعلام لتحسين صورته."},
+                {category: "الشعب", text: "انفتاح ثقافي – تفاعل على السوشيال ميديا – انتقادات ساخرة بدلًا من المواجهة. الشعب يستخدم الفن والسخرية للتعبير."},
+                {category: "المال", text: "ضخ إعلامي حول تحسن الأوضاع – دعم من فنانين أو مشاهير – لكن الواقع صعب. هناك فجوة بين الصورة والواقع."},
+                {category: "السمعة", text: "استخدام الفعاليات الثقافية لتحسين الصورة – تراجع الحديث عن الملفات الشائكة. تحاول تحسين صورتها من خلال الثقافة."},
+                {category: "الأزمات", text: "ملف فساد إعلامي أو فني – حظر لبعض المحتويات – احتكاكات في الوسط الثقافي. حرية التعبير تحت الضغط."},
+                {category: "العقبات", text: "تضخيم الإنجازات – إخفاء الحقائق الاقتصادية – وعود غير قابلة للتنفيذ. المصداقية تشكل تحديًا كبيرًا."},
+                {category: "الكوارث", text: "احتمالية انفجار أزمة 'تواصل' – ردود فعل جماهيرية غاضبة من تلاعب إعلامي. الإعلام قد يكون سلاحًا ذا حدين."},
+                {category: "النجاحات", text: "مهرجان دولي – اهتمام أوروبي بملف ثقافي – اتفاق إعلامي خارجي. فرصة لتحسين الصورة الدولية."},
+                {category: "الجيش", text: "يُستخدم كرمز في الفعاليات – صورته محفوظة لكنها مُستغلّة. يظهر كرمز وطني."},
+                {category: "الشرطة", text: "دور في تنظيم الفعاليات – خفض التصعيد – تجنب العنف المفرط. تحاول تحسين صورتها."}
+            ],
+            4: [
+                {category: "الحاكم", text: "طاقة جامدة – قرارات ثقيلة – يشعر بالخطر لكنه لا يتراجع – يعوّل على الأجهزة أكثر من الشعب. نسبة التغيير: 19%. يتمسك بالسلطة بكل الوسائل."},
+                {category: "الشعب", text: "إحباط عام – عودة نزعة الانغلاق – استسلام مؤقت لكنه قابل للانفجار في أي لحظة. الشعب في حالة كتم قد تنفجر."},
+                {category: "المال", text: "تعثر واضح – تأجيل رواتب أو تقليص دعم – مشاريع تبنى لكنها غير مُفعّلة. الاقتصاد في حالة ركود."},
+                {category: "السمعة", text: "ركود في التفاعل الدولي – صمت مريب – تركيز على الملفات الأمنية أكثر من الاقتصادية. العزلة الدولية تزداد."},
+                {category: "الأزمات", text: "انهيار بنية تحتية في منطقة معينة – تصدع مؤسسات صغيرة – ضغوط متراكمة بلا حلول. البنية التحتية تحتاج للصيانة."},
+                {category: "العقبات", text: "مقاومة داخلية للتغيير – مسؤولين يعيقون التطوير خوفًا على مناصبهم – بيروقراطية خانقة. الفساد يعيق التقدم."},
+                {category: "الكوارث", text: "انهيار مبنى أو منشأة حكومية – تسرب أو حريق – كارثة مادية أكثر منها طبيعية. يجب الاهتمام بالسلامة."},
+                {category: "النجاحات", text: "ترميم مؤسسة قديمة – إحياء ذكرى وطنية – محاولة ترسيخ هوية 'الثبات'. تحاول تعزيز الهوية الوطنية."},
+                {category: "الجيش", text: "دوره تقني وبنّاء – يشارك في مشروعات بنية تحتية – صوته منخفض لكنه حاضر. يلعب دورًا تنمويًا."},
+                {category: "الشرطة", text: "تشديد إداري – متابعة صارمة – محاسبة لبعض العناصر علنًا لإظهار الجدية. تحاول تحسين صورتها."}
+            ],
+            5: [
+                {category: "الحاكم", text: "قرارات متقلبة – يسعى لتغيير صورته – قد يُلمّح إلى انتخابات أو استفتاء مفاجئ. نسبة التغيير: 62%. يحاول التكيف مع المتغيرات."},
+                {category: "الشعب", text: "وعي مرتفع – مطالبات مباشرة – تحركات نقابية أو مهنية تنمو. الشعب يطالب بحقوقه بصراحة."},
+                {category: "المال", text: "تغيرات في السياسات المالية – صعود وهبوط سريع في العملة – تجارة إلكترونية نشطة. الاقتصاد في حالة تغير مستمر."},
+                {category: "السمعة", text: "حضور في منتديات عالمية – انتقادات منظمات دولية يقابلها دفاع رسمي حاد. الصورة الدولية متناقضة."},
+                {category: "الأزمات", text: "حادث سياسي مفاجئ – وثائق مسرّبة – انقسام في الرأي العام. الأزمات تظهر فجأة."},
+                {category: "العقبات", text: "قرارات ترتد على أصحابها – تجريب مستمر بلا نتائج ثابتة. عدم الاستقرار يعيق التقدم."},
+                {category: "الكوارث", text: "حادث طيران أو قطار – تغطية إعلامية مكثفة – تدخل خارجي تقني. يجب الاهتمام بسلامة النقل."},
+                {category: "النجاحات", text: "فتح ملف حقوقي – ظهور كفاءات شبابية – إطلاق حملة توعوية وطنية. فرص للتغيير الإيجابي."},
+                {category: "الجيش", text: "انفتاح نسبي – تدريب مشترك مع دولة أجنبية – تعزيز مفهوم 'الجيش الذكي'. يواكب التطورات التكنولوجية."},
+                {category: "الشرطة", text: "نشاط أمني غير تقليدي – ظهور لوجوه جديدة في الإعلام – شكاوى متناقضة. تحاول التكيف مع المتغيرات."}
+            ],
+            6: [
+                {category: "الحاكم", text: "طاقة تصالحية – يعرض 'مبادرات' – لكن خلف الكواليس يبقى الحذر. نسبة التغيير: 33%. يحاول تحسين صورته."},
+                {category: "الشعب", text: "تحرك من الطبقة المتوسطة – نقاشات اجتماعية حول العدالة – تصاعد مطالب 'المشاركة'. الشعب يطالب بالعدالة الاجتماعية."},
+                {category: "المال", text: "دعم غير مباشر من شركاء إقليميين – تمويلات للمجتمع المدني – مشاريع إسكان تظهر فجأة. مساعدات خارجية تدعم الاقتصاد."},
+                {category: "السمعة", text: "تحسين نسبي – تسويق لملف الحماية الاجتماعية – لكن تساؤلات حول الحقوق مستمرة. الصورة تتحسن لكن ببطء."},
+                {category: "الأزمات", text: "قضية أخلاقية تُفجّر الإعلام – أو جدل ديني – انقسام شعبي بين التقليد والتجديد. قضايا اجتماعية تسبب انقسامًا."},
+                {category: "العقبات", text: "ظهور تحالفات غير رسمية – رفض لتغييرات قانونية – خوف من قوى 'ناعمة' جديدة. المعارضة تزداد قوة."},
+                {category: "الكوارث", text: "أزمة عائلية في مؤسسة كبرى – اغتيال رمزي لشخصية مؤثرة في المجتمع. أحداث مفاجئة تؤثر في الرأي العام."},
+                {category: "النجاحات", text: "مهرجان عالمي – اتفاق مع دولة أوروبية – تسويق صورة التسامح والسلام. فرصة لتحسين الصورة الدولية."},
+                {category: "الجيش", text: "يظهر في دور الحماية – دعم للأنشطة الاجتماعية – حضور في ملفات الإعمار. يلعب دورًا إنسانيًا."},
+                {category: "الشرطة", text: "مرونة أكبر – تدريب حول حقوق الإنسان – لكن الرقابة مستمرة في الخفاء. تحاول تحسين صورتها."}
+            ],
+            7: [
+                {category: "الحاكم", text: "ميل للصمت – قرارات تُتخذ بعيدًا عن الإعلام – إشارات غامضة تُفسر لاحقًا. نسبة التغيير: 28%. يحكم من خلف الكواليس."},
+                {category: "الشعب", text: "بحث عن معنى – توجه ديني أو صوفي – تصاعد الحديث عن المؤامرات. الشعب يبحث عن إجابات."},
+                {category: "المال", text: "حركة غير مرئية – أموال تُدار خارج النظام الرسمي – غموض في الإيرادات والمصروفات. اقتصاد غير رسمي كبير."},
+                {category: "السمعة", text: "التقدير العلمي يرتفع – تقارير سرية إيجابية – لكن قنوات الإعلام لا تعكس الحقيقة. الصورة الحقيقية مخفية."},
+                {category: "الأزمات", text: "تسريب معلومات خطيرة – اختفاء وجوه سياسية – أو فشل مفاوضات مهمة. أزمات تظهر فجأة."},
+                {category: "العقبات", text: "انغلاق الحكومة على نفسها – تجاهل للمطالب – استخدام الدين لتبرير الأزمات. الفجوة بين الشعب والحكومة تزداد."},
+                {category: "الكوارث", text: "أمراض نفسية جماعية – ارتفاع نسب الانتحار أو الجرائم الغريبة. مشاكل اجتماعية عميقة."},
+                {category: "النجاحات", text: "كشف أثري – اكتشاف علمي – رفع تصنيف جامعات أو معاهد. إنجازات في المجال العلمي."},
+                {category: "الجيش", text: "سكون مقصود – معلومات متضاربة – دور أمني غير مُعلن. يلعب دورًا خفيًا."},
+                {category: "الشرطة", text: "تحقيقات سرية – اختفاء مؤقت لبعض الشخصيات – رقابة إلكترونية مشددة. تركز على الأمن الداخلي."}
+            ],
+            8: [
+                {category: "الحاكم", text: "سلطة مالية قوية – قرارات تعزز مركزه الاقتصادي – تحركات غير مرئية لشراء ولاءات. نسبة التغيير: 17%. يحكم من خلال القوة المالية."},
+                {category: "الشعب", text: "انقسام واضح بين فئات 'مستفيدة' و'مطحونة' – خطاب طبقي جديد يظهر. الفجوة الطبقية تزداد."},
+                {category: "المال", text: "نشاط في البورصة – صفقات بيع وشراء ضخمة – لكن جيوب المواطن لا تنتعش. الأغنياء يزدادون غنى."},
+                {category: "السمعة", text: "يُنظر إليه كـ 'دولة صفقات' – يحظى باحترام مالي لكنه يُنتقد إنسانيًا. الصورة الدولية مرتبطة بالمال."},
+                {category: "الأزمات", text: "أزمة عقارية – ارتفاع كبير في الأسعار – اختفاء منتجات من السوق. أزمات اقتصادية تظهر."},
+                {category: "العقبات", text: "تركيز على المال دون الشعب – خصخصة مفرطة – غضب مكتوم. السياسات الاقتصادية تسبب غضبًا."},
+                {category: "الكوارث", text: "انهيار بنك صغير – فضيحة مالية – تورط رجال أعمال في قضية فساد. فساد مالي يظهر."},
+                {category: "النجاحات", text: "اتفاقية اقتصادية كبرى – تعاون استثماري مع قوى دولية – مشاريع بنية تحتية عملاقة. صفقات اقتصادية كبيرة."},
+                {category: "الجيش", text: "يدير شركات – يظهر في صورة المستثمر والمقاول – يربح سياسيًا واقتصاديًا. له دور اقتصادي كبير."},
+                {category: "الشرطة", text: "دور تنفيذي أكثر منه أمني – تدخل لحماية مشروعات أو عقود. تحمي المصالح الاقتصادية."}
+            ],
+            9: [
+                {category: "الحاكم", text: "يمر بدورة ختامية – يهيئ الأرضية للرحيل أو الانتقال – رسائل موجهة بذكاء. نسبة التغيير: 85%. نهاية حقبة."},
+                {category: "الشعب", text: "استعداد لتغيير جذري – عاطفة عالية – أحاديث عن 'ما بعد النظام'. الشعب يتطلع للتغيير."},
+                {category: "المال", text: "إنفاق عالي – دعم غريب – محاولات شراء السكون الشعبي. محاولات يائسة للبقاء."},
+                {category: "السمعة", text: "دوليًا يُراقب – يقال عنه 'يحتضر' – ولكن يتعامل بدهاء. الصورة الدولية ضعيفة."},
+                {category: "الأزمات", text: "حدث مفاجئ يغير موازين الداخل – استقالة أو وفاة شخصية عامة. أحداث مفصلية."},
+                {category: "العقبات", text: "أزمة هوية وطنية – طرح أسئلة كبرى – خلاف حول المستقبل. البلاد على مفترق طرق."},
+                {category: "الكوارث", text: "خطر من خارج الحدود – صدمة معنوية كبرى – أو نبوءة تُثار وتؤثر شعبيًا. تهديدات خارجية."},
+                {category: "النجاحات", text: "انتصار أخير – تهدئة ملف خارجي – إعلان شعبيات رمزية. نجاحات مؤقتة."},
+                {category: "الجيش", text: "يراقب فقط – يستعد للدور القادم – حياد ظاهري. يتحضر للمرحلة القادمة."},
+                {category: "الشرطة", text: "ضعف نسبي – تراجع في الأداء – أو اختفاء من الشوارع. فقدان السيطرة."}
+            ]
+        };
+
+        // بيانات التوقعات العامة للأشخاص
+        const peoplePredictions = {
+            1: [
+                "عاطفيًا: بداية حب أو إنهاء علاقة قديمة. سيطرة، قرارات فردية. قد تواجه تحديات في العلاقات بسبب رغبتك في السيطرة.",
+                "ماديًا: بدايات مالية غير مستقرة، لكنها تحمل بذور الثراء. استثمر بحكمة وابتعد عن المخاطرة غير المحسوبة.",
+                "مهنيًا: بداية مشروع، استلام منصب أو قيادة شيء ما. هذه سنة قوية لبدايات جديدة في العمل.",
+                "صحيًا: نشاط بدني عالٍ، تحذير من الحوادث أو ارتفاع الضغط. اهتم بضغط الدم وتجنب الإرهاق المفرط.",
+                "أزمات: اندفاع وقرارات متسرعة تخلق توترات. فكر مرتين قبل اتخاذ القرارات المهمة.",
+                "نجاحات: قيادة، شهرة، بروز اجتماعي. قد تحقق تقدماً ملحوظاً في مجال عملك."
+            ],
+            2: [
+                "عاطفيًا: ارتباطات قوية، لكن مشحونة عاطفيًا. صعود وهبوط بالمشاعر. قد تواجه تقلبات في علاقاتك العاطفية.",
+                "ماديًا: دعم من شريك أو شركة. مال غير دائم. قد تحتاج لمساعدة الآخرين في الأمور المالية.",
+                "مهنيًا: شراكات أو وظيفة تحت سلطة. قد يكون العمل الجماعي هو طريقك للنجاح هذا العام.",
+                "صحيًا: مشاكل هضمية أو نفسية (اكتئاب/تردد). اهتم بصحتك النفسية والجهاز الهضمي.",
+                "أزمات: تأجيل، تردد، تضارب بين العاطفة والمنطق. قد تواجه صعوبات في اتخاذ القرارات.",
+                "نجاحات: عند العمل الجماعي، وبمساعدة الآخرين. قد تحقق نجاحات كبيرة من خلال التعاون."
+            ],
+            3: [
+                "عاطفيًا: حياة عاطفية نشطة جدًا. انفتاح على أكثر من علاقة. قد تجذب العديد من العلاقات الجديدة.",
+                "ماديًا: حظ مالي، مكافآت، عقود مفاجئة. قد تحصل على مصادر دخل غير متوقعة.",
+                "مهنيًا: فرص إبداعية، شهرة، مشاريع حرة. قد يكون هذا العام مميزاً في عملك.",
+                "صحيًا: تنبيه من الإفراط (سُمنة/إجهاد). تجنب الإفراط في الأكل أو العمل.",
+                "أزمات: المبالغة/السطحية. قد تواجه مشاكل بسبب عدم الجدية الكافية.",
+                "نجاحات: توسيع علاقات – سفر – انتشار. قد تحقق شهرة وتوسع شبكة علاقاتك."
+            ],
+            4: [
+                "عاطفيًا: برود عاطفي، تكرار الملل أو الروتين. قد تشعر بالملل في علاقاتك.",
+                "ماديًا: دخل ثابت لكنه بطيء. قد تحتاج للصبر لتحقيق أهدافك المالية.",
+                "مهنيًا: استقرار، لكن صرامة، عبء. قد تشعر بثقل المسؤوليات في العمل.",
+                "صحيًا: آلام العظام أو المفاصل. اهتم بوضعية جسمك وتجنب الأحمال الثقيلة.",
+                "أزمات: تأخير، تعقيدات إدارية، فقدان المرونة. قد تواجه بيروقراطية وتعقيدات.",
+                "نجاحات: بناء مستقر، ترقية، ملكية. قد تحقق استقراراً في العمل والحياة."
+            ],
+            5: [
+                "عاطفيًا: تقلب، تجربة، غيرة، خيانة واردة. قد تواجه تقلبات في علاقاتك.",
+                "ماديًا: مكاسب سريعة، لكن صرف بلا حساب. قد تحتاج لضبط إنفاقك.",
+                "مهنيًا: تنقلات، تغيير عمل، صحافة أو تواصل. قد تحدث تغييرات كبيرة في عملك.",
+                "صحيًا: توتر عصبي، مشاكل تنفسية. تجنب التوتر ومارس تمارين التنفس.",
+                "كوارث: احتمال حوادث أو خسائر مفاجئة. كن حذراً في تنقلاتك.",
+                "نجاحات: مهارة في التفاوض – علاقات متعددة. قد تحقق نجاحات في التواصل."
+            ],
+            6: [
+                "عاطفيًا: زواج، حمل، ارتباط قوي. قد تكون سنة مميزة في حياتك العاطفية.",
+                "ماديًا: دخل من عمل مرتبط بالجمال/الخدمات. قد تحقق دخل من أعمال إبداعية.",
+                "مهنيًا: تعاون – وظائف تعليم أو رعاية. قد تنجح في المهن الإنسانية.",
+                "صحيًا: مشاكل بالسكر أو الهرمونات. اهتم بنظامك الغذائي وصحتك.",
+                "أزمات: تعلق، خضوع، خوف من الرفض. قد تواجه تحديات في التعبير عن نفسك.",
+                "نجاحات: حياة أسرية ناجحة – دعم المحيط. قد تحقق استقراراً أسرياً."
+            ],
+            7: [
+                "عاطفيًا: علاقة كرمية – روحانية – لكن غامضة. قد تواجه علاقات عميقة وغامضة.",
+                "ماديًا: تأخير – صرف على الروحانيات/العلم. قد تنفق على التطوير الذاتي.",
+                "مهنيًا: عمل فردي – بحث – ميتافيزيقا. قد تنجح في الأعمال الفردية.",
+                "صحيًا: أمراض نفسية أو مزمنة. اهتم بصحتك النفسية.",
+                "أزمات: خيبات – خيانات – شعور بالعزلة. قد تواجه خيبات أمل.",
+                "نجاحات: اكتشاف الذات – شهرة باطنية. قد تحقق تقدماً في معرفة الذات."
+            ],
+            8: [
+                "عاطفيًا: علاقات كرمية، اختبار قوي، تعلق أو سيطرة. قد تواجه علاقات صعبة.",
+                "ماديًا: قفزات مالية كبيرة أو ديون ضخمة. قد تحقق ثروة أو تواجه ديوناً.",
+                "مهنيًا: مناصب عليا – مسؤوليات ثقيلة. قد تحصل على مناصب قيادية.",
+                "صحيًا: أمراض هيكلية – مشاكل جلد/كلى. اهتم بصحتك الجسدية.",
+                "كوارث: إفلاس – فراق – ضغط حكومي. قد تواجه تحديات مالية وقانونية.",
+                "نجاحات: نجاح في مجال إداري – قانوني – سياسي. قد تحقق نجاحات في المجالات الرسمية."
+            ],
+            9: [
+                "عاطفيًا: انتهاء علاقة – تصفية كرمية. قد تواجه نهايات في علاقاتك.",
+                "ماديًا: صرف كبير – إنهاء مرحلة مالية. قد تنفق الكثير أو تنهي مشاريع.",
+                "مهنيًا: انسحاب – إغلاق – انتقال جذري. قد تحدث تغييرات جذرية في عملك.",
+                "صحيًا: طاقة عالية – خطر عمليات جراحية. كن حذراً مع صحتك.",
+                "كوارث: حروب – خسائر – مواجهة كارما. قد تواجه تحديات كبيرة.",
+                "نجاحات: بعد الألم – شهرة أو إنجاز عظيم. قد تحقق نجاحات بعد التحديات."
+            ]
+        };
+
+        // بيانات التوقعات العامة للدول
+        const countriesPredictions = {
+            1: [
+                "الحاكم: حاكم يفرض سلطته بشكل فردي، قرارات فوقية، محاولة للظهور كقائد مُخلِّص. قد يواجه معارضة متزايدة.",
+                "الشعب: مطالبات فردية – طاقات استقلالية – فقدان الثقة في المؤسسات. قد تظهر حركات احتجاجية.",
+                "المال: بداية إصلاحات مالية – مشروعات ضخمة، لكنها تحتاج وقت للنمو. الاقتصاد في مرحلة انتقالية.",
+                "الشرطة: حضور قوي – استعراض – ضبط أكثر من إصلاح. قد تزداد القيود الأمنية.",
+                "الجيش: مناورات خارجية – إشارات لإعادة الهيكلة – لكن دون حروب كبرى. قد يلعب دوراً أكبر.",
+                "الحرب: تهديدات لا حروب فعلية – استعراض قوة. قد تزداد التوترات الإقليمية.",
+                "الكوارث: حرائق، شمسية، تصحُّر أو اضطرابات مناخية. يجب الاستعداد للكوارث الطبيعية.",
+                "الأزمات: عزلة سياسية – عناد داخلي – رفض الإصلاح الحقيقي. قد تتفاقم الأزمات السياسية.",
+                "النجاحات: تبدأ ببطء – تُبنى على شخصية الزعيم. قد تحقق تقدماً في بعض المجالات.",
+                "الفشل: بسبب التمسك بالسلطة أو تغييب الحوار. قد يفشل النظام في الإصلاح."
+            ],
+            2: [
+                "الحاكم: ميال للحلول السلمية – تردد – ربما حكومة ائتلافية. قد يواجه صعوبات في اتخاذ القرارات.",
+                "الشعب: انقسام أو استقطاب – الحاجة لحوار داخلي. قد تزداد الانقسامات المجتمعية.",
+                "المال: دعم خارجي – مساعدات – قروض بتأثيرات أجنبية. قد يعتمد الاقتصاد على المساعدات.",
+                "الشرطة: تظهر في مواقف عاطفية – تعاطف مع الناس – ضعف في الحسم. قد تفتقر للفاعلية.",
+                "الجيش: تعاونات – مناورات مشتركة – لا تصعيد. قد يلعب دوراً دبلوماسياً.",
+                "الحرب: هدوء، ميل لتفاديها – توقيع هُدن أو اتفاقيات. قد تشهد فترة سلام نسبي.",
+                "الكوارث: فيضانات – تسونامي – ارتفاع البحر. يجب الاستعداد للكوارث الطبيعية.",
+                "الأزمات: ضعف في القرار، كثرة التشاورات – تراجع عن قرارات مهمة. قد تتأخر الحلول للأزمات.",
+                "النجاحات: في التفاوض – الوساطة – المشاريع الثنائية. قد تحقق نجاحات دبلوماسية.",
+                "الفشل: تردد – فقدان المبادرة. قد يفوت الفرص بسبب التردد."
+            ],
+            3: [
+                "الحاكم: يُكثف ظهوره الإعلامي – وعود – خطابات رنانة. قد يعتمد على الدعاية.",
+                "الشعب: طاقة حماس – مهرجانات – احتفالات – أحيانًا مطالبات عالية بلا تخطيط. قد يكون هناك تفاؤل زائد.",
+                "المال: انتعاش من السياحة، الإعلام، المشروعات التجارية. قد يتحسن الاقتصاد في بعض القطاعات.",
+                "الشرطة: تهتم بصورة الدولة – تغطي أكثر مما تُعالج. قد تعطي أولوية للصورة على الجوهر.",
+                "الجيش: رمزي، أكثر من فعلي – علاقات عامة – ظهور في المناسبات. قد يقتصر دوره على المظاهر.",
+                "الحرب: صعبة – إلا إذا بدأت فجأة من جهة خارجية. قد تكون في حالة سلام.",
+                "الكوارث: مرتبطة بالإعلام – انفجارات، حوادث جوية أو نقل. قد تواجه حوادث مفاجئة.",
+                "الأزمات: خداع إعلامي – تضخيم إنجازات – لا إنجازات حقيقية. قد تظهر فجوة بين الواقع والصورة.",
+                "النجاحات: شهرة دولية – علاقات دبلوماسية – رواج. قد تتحسن الصورة الدولية.",
+                "الفشل: سطحي – استعراض بلا جوهر. قد تفشل في تحقيق إنجازات حقيقية."
+            ],
+            4: [
+                "الحاكم: صارم – إداري – متمسك بالقوانين – عديم المرونة. قد يكون متصلباً في مواقفه.",
+                "الشعب: يميل إلى السكون، أو يتم قمعه – صامت لكنه متوتر. قد يكون الشعب في حالة كتم.",
+                "المال: إصلاحات متأخرة – مشاريع تحت البناء لا تظهر سريعًا. قد يكون النمو الاقتصادي بطيئاً.",
+                "الشرطة: عنيفة – تطبيق القانون بصرامة. قد تزداد القيود الأمنية.",
+                "الجيش: استعداد دائم – ربما قاعدة حربية – لكنه لا يتحرك. قد يكون في حالة تأهب.",
+                "الحرب: محتملة إن تجاوزت الضغوط – غالبًا داخلية. قد تواجه اضطرابات داخلية.",
+                "الكوارث: انهدام بنية – زلازل – مشاكل في البنية التحتية. يجب الاهتمام بالبنية التحتية.",
+                "الأزمات: بسبب الجمود – عناد المسؤولين – فساد إداري. قد تتفاقم الأزمات بسبب البيروقراطية.",
+                "النجاحات: بناء طويل الأجل – قوة قانونية. قد تحقق استقراراً على المدى الطويل.",
+                "الفشل: روتين – تأخير – تفكك داخلي. قد تفشل في التكيف مع المتغيرات."
+            ],
+            5: [
+                "الحاكم: متقلّب – مفاجئ في قراراته – إما عبقري أو متهور. قد يتخذ قرارات غير متوقعة.",
+                "الشعب: مظاهرات – حركة – شغب – صوت مرتفع. قد تشهد احتجاجات واضطرابات.",
+                "المال: مكاسب سريعة – مضاربات – تذبذب. قد يكون الاقتصاد متقلباً.",
+                "الشرطة: عشوائية – تفلت – أو فساد واضح. قد تفتقر للانضباط.",
+                "الجيش: حاضر في الشارع – انقلابات محتملة. قد يلعب دوراً سياسياً.",
+                "الحرب: واردة جدًا – أو تدخلات عسكرية من الخارج. قد تواجه نزاعات مسلحة.",
+                "الكوارث: أعاصير، حوادث نقل، انفجارات، حوادث طيران. يجب الاستعداد للكوارث.",
+                "الأزمات: فقدان الاستقرار – تضارب بالمواقف. قد تواجه أزمات متعددة.",
+                "النجاحات: في الإبداع، الصحافة، التكنولوجيا. قد تنجح في المجالات الحديثة.",
+                "الفشل: تمرد – خروج عن السيطرة. قد تفقد السيطرة على الأوضاع."
+            ],
+            6: [
+                "الحاكم: حاكم يحاول إرضاء الشعب – يميل للخطاب العاطفي. قد يحاول تحسين صورته.",
+                "الشعب: يحب الاستقرار – طاقة جماعية – ترابط عائلي. قد يكون هناك تماسك اجتماعي.",
+                "المال: من الفن – السياحة – التعليم – العقارات. قد يتحسن الاقتصاد في القطاعات الخدمية.",
+                "الشرطة: تنضبط، لكن ببطء – حلول سلمية. قد تتحسن العلاقة مع الشعب.",
+                "الجيش: بعيد – يُستخدم فقط للرمزية. قد يكون دوره محدوداً.",
+                "الحرب: نادرة – ميل دائم للسلام. قد تشهد فترة سلام.",
+                "الكوارث: مرتبطة بالطبيعة – حرائق، أمطار غزيرة. يجب الاستعداد للكوارث الطبيعية.",
+                "الأزمات: ضعف في الحسم – تراكم مشاكل من دون حلول. قد تتأخر حلول المشاكل.",
+                "النجاحات: علاقات دولية – تسويق الدولة – سمعة ناعمة. قد تتحسن الصورة الدولية.",
+                "الفشل: تباطؤ، فقدان روح الحسم. قد تفوت الفرص بسبب البطء."
+            ],
+            7: [
+                "الحاكم: غامض، يُخفي قراراته – يعتمد على الاستخبارات. قد يحكم من خلف الكواليس.",
+                "الشعب: قلق، لا يعلم ما يدور – يغلب عليه الطابع الروحي أو الانسحابي. قد يكون الشعب في حالة حيرة.",
+                "المال: ضبابي – ربما فساد – لا شفافية. قد يكون الاقتصاد غير شفاف.",
+                "الشرطة: أمن دولة – رقابة – تجسس داخلي. قد تزداد القيود الأمنية.",
+                "الجيش: عمليات خفية – تدخلات سرية – دعم مليشيات أو جماعات. قد يلعب دوراً خفياً.",
+                "الحرب: سيبرانية – استخباراتية – اغتيالات. قد تواجه حروباً غير تقليدية.",
+                "الكوارث: تسريبات – زلازل – اغتيالات رمزية. قد تواجه أحداثاً مفاجئة.",
+                "الأزمات: خيانة – انشقاقات – اختفاء رموز. قد تظهر أزمات داخل النظام.",
+                "النجاحات: كشف ملفات – انتصارات استخباراتية. قد تنجح في المجالات الاستخباراتية.",
+                "الفشل: فقدان الثقة – انهيار داخلي بلا سبب ظاهر. قد يواجه النظام أزمات ثقة."
+            ],
+            8: [
+                "الحاكم: عسكري أو سلطوي – فرض هيمنة – قوانين طاحنة. قد يستخدم القوة للحكم.",
+                "الشعب: خائف – لكنه ينفجر فجأة – إما خضوع أو ثورة. قد تكون على حافة الانفجار.",
+                "المال: نفط – معادن – اقتصاد ثقيل – ديون خارجية. قد يعتمد الاقتصاد على الموارد الطبيعية.",
+                "الشرطة: حديدية – تعذيب – سجون. قد تزداد القمعية.",
+                "الجيش: جيش شرس – حروب – احتلالات أو استعراض قوة. قد يلعب دوراً عدوانياً.",
+                "الحرب: قائمة أو محتملة بشدة. قد تواجه نزاعات مسلحة.",
+                "الكوارث: اقتصادية – عقوبات – نقص موارد – زلازل. قد تواجه أزمات اقتصادية.",
+                "الأزمات: صراعات داخل السلطة – تمردات. قد تظهر انقسامات داخل النظام.",
+                "النجاحات: حينما تُعاد الهيكلة – بناء إمبراطوريات. قد تحقق قوة اقتصادية.",
+                "الفشل: سقوط عنيف – بسبب الغرور أو العقوبات. قد يواجه النظام انهياراً."
+            ],
+            9: [
+                "الحاكم: قد يُقتل أو يُعزل – نهاية حكم أو نظام. قد تكون نهاية حقبة.",
+                "الشعب: ثورة دموية – كرامة – إسقاط أنظمة. قد تشهد ثورة شعبية.",
+                "المال: تصفية ثروات – انهيارات أو إعادة بناء شاملة. قد يواجه الاقتصاد أزمة حادة.",
+                "الشرطة: ضعيفة – أو تدخل في صدام مباشر مع الشعب. قد تفقد السيطرة.",
+                "الجيش: يتدخل بقوة – انقلابات – حروب شوارع. قد يلعب دوراً حاسماً.",
+                "الحرب: دامية – داخلية أو خارجية – انهيار حدود. قد تواجه حرب أهلية.",
+                "الكوارث: زلازل – حرائق – اغتيالات – أمراض وبائية. قد تواجه كوارث متعددة.",
+                "الأزمات: دموية – انهيار عام – اغتيالات سياسية. قد تكون في أزمة شاملة.",
+                "النجاحات: نادرة – تأتي فقط بعد التضحية الكبرى. قد تنجح بعد التحديات.",
+                "الفشل: شامل – انهيار أو تقسيم دولة. قد تواجه تفككاً."
+            ]
+        };
+
+        // رموز لكل رقم
+        const numberSymbols = {
+            1: "☀️",
+            2: "🌙",
+            3: "♃",
+            4: "⚡",
+            5: "☿",
+            6: "♀",
+            7: "🌀",
+            8: "♄",
+            9: "♂"
+        };
+
+        // عناوين لكل رقم
+        const numberTitles = {
+            1: "البداية / الاستقلال / الشمس",
+            2: "التوازن / العاطفة / القمر",
+            3: "الإبداع / الانطلاق / المشتري",
+            4: "النظام / العمل / أورانوس",
+            5: "الحرية / المغامرة / عطارد",
+            6: "الأسرة / الحب / الزهرة",
+            7: "الغموض / الحكمة / نبتون",
+            8: "المال / القوة / زحل",
+            9: "النهاية / الكارما / المريخ"
+        };
+
+        // عناصر DOM
+        const numberInput = document.getElementById('number');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const resultSection = document.getElementById('resultSection');
+        const resultTitle = document.getElementById('resultTitle');
+        const resultContent = document.getElementById('resultContent');
+        const symbolElement = document.getElementById('symbol');
+        const numberItems = document.querySelectorAll('.number-item');
+        const predictionList = document.getElementById('predictionList');
+        const loadingElement = document.getElementById('loading');
+        
+        // اختيار رقم من الشبكة
+        numberItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const number = item.getAttribute('data-number');
+                numberInput.value = number;
+                
+                // تحديث النشط في الشبكة
+                numberItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                
+                // تحديث النتائج إذا كانت معروضة
+                if(resultSection.classList.contains('visible')) {
+                    displayAnalysis();
+                }
+            });
+        });
+        
+        // زر التحليل
+        analyzeBtn.addEventListener('click', displayAnalysis);
+        
+        // عرض التحليل
+        function displayAnalysis() {
+            const number = numberInput.value;
+            const jafrType = document.querySelector('input[name="jafrType"]:checked').value;
+            
+            if(number < 1 || number > 9) {
+                alert('الرجاء إدخال رقم بين 1 و 9');
+                return;
+            }
+            
+            // إظهار شاشة التحميل
+            loadingElement.style.display = 'block';
+            resultSection.classList.remove('visible');
+            
+            // محاكاة عملية التحميل
+            setTimeout(() => {
+                // تحديد البيانات حسب النوع
+                const analysisData = jafrType === 'people' ? peopleAnalysis[number] : countriesAnalysis[number];
+                const titlePrefix = jafrType === 'people' ? 'تحليل الجفر للأشخاص - الرقم ' : 'تحليل الجفر للدول - الرقم ';
+                
+                // تحديث العنوان والرمز
+                resultTitle.textContent = `${titlePrefix}${number} - ${numberTitles[number]}`;
+                symbolElement.textContent = numberSymbols[number];
+                
+                // مسح المحتوى السابق
+                resultContent.innerHTML = '';
+                predictionList.innerHTML = '';
+                
+                // إضافة التوقعات العامة
+                const predictionsData = jafrType === 'people' ? peoplePredictions[number] : countriesPredictions[number];
+                predictionsData.forEach(prediction => {
+                    const predictionElement = document.createElement('div');
+                    predictionElement.className = 'prediction-item';
+                    
+                    const icon = document.createElement('i');
+                    icon.className = 'fas fa-star';
+                    
+                    const textElement = document.createElement('div');
+                    textElement.className = 'prediction-text';
+                    textElement.textContent = prediction;
+                    
+                    predictionElement.appendChild(icon);
+                    predictionElement.appendChild(textElement);
+                    
+                    predictionList.appendChild(predictionElement);
+                });
+                
+                // إضافة العناصر الجديدة للتحليل التفصيلي
+                analysisData.forEach(item => {
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'result-item';
+                    
+                    const categoryElement = document.createElement('div');
+                    categoryElement.className = 'result-category';
+                    categoryElement.innerHTML = `<i class="fas fa-info-circle"></i> ${item.category}`;
+                    
+                    const textElement = document.createElement('div');
+                    textElement.className = 'result-text';
+                    textElement.textContent = item.text;
+                    
+                    itemElement.appendChild(categoryElement);
+                    itemElement.appendChild(textElement);
+                    
+                    resultContent.appendChild(itemElement);
+                });
+                
+                // إخفاء شاشة التحميل وإظهار النتائج
+                loadingElement.style.display = 'none';
+                resultSection.classList.add('visible');
+                
+                // التمرير إلى النتائج
+                resultSection.scrollIntoView({ behavior: 'smooth' });
+            }, 1500);
+        }
+        
+        // عرض التحليل عند التحميل للرقم 5 والأشخاص
+        window.addEventListener('load', displayAnalysis);
+    </script>
+</body>
+</html>
